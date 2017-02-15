@@ -1,6 +1,5 @@
 package com.list.asus.weather2;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -131,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
         tip_drawerLayout = (ImageButton) findViewById(R.id.tip_drawerLayout);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
-        navigationView = (NavigationView) findViewById(R.id.Nav_view);
 
         //设置titleCity的文字大小及颜色
         String[] cityId = getResources().getStringArray(R.array.cityId);
@@ -153,24 +151,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //策划列表的监听
-        navigationView.setNavigationItemSelectedListener(new NavigationView
-                .OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.chooseCity:
-                        Intent intent = new Intent(MainActivity.this, ChooseAreaActivity.class);
-                        startActivity(intent);
-                        finish();
-                        break;
-                    case R.id.nav_setting:
-                        break;
-                    case R.id.about:
-                        break;
-                }
-                return false;
-            }
-        });
+
 
         //背景图片初始化
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

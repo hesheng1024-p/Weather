@@ -45,13 +45,11 @@
             </ScrollView>
         </android.support.v4.widget.SwipeRefreshLayout>
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/Nav_view"
+        <fragment
+            android:id="@+id/choose_area_fragment"
+            android:name="com.list.asus.weather2.ChooseAreaFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            app:menu="@menu/menu"
-            app:headerLayout="@layout/nav_choosing_header"/>
+            android:layout_height="match_parent"/>
 
     </android.support.v4.widget.DrawerLayout>
 </FrameLayout>

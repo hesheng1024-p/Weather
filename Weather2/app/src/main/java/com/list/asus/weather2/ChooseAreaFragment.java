@@ -4,9 +4,11 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -30,9 +32,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-import static android.R.attr.type;
-
-public class ChooseAreaActivity extends AppCompatActivity {
+public class ChooseAreaFragment extends Fragment {
 
     public static final int LEVEL_PROVINCE = 0;
 
@@ -70,16 +70,22 @@ public class ChooseAreaActivity extends AppCompatActivity {
     //当前选中的级别
     private int currentLevel;
 
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.choose_area);
-
-        titleText = (TextView) findViewById(R.id.title_text);
-        backButton = (Button) findViewById(R.id.back_button);
-        listView = (ListView) findViewById(R.id.choosing_list_view);
-        adapter = new ArrayAdapter<>(ChooseAreaActivity.this, android.R.layout.simple_list_item_1, dataList);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.choose_area, container, false);
+        titleText = (TextView) view.findViewById(R.id.title_text);
+        backButton = (Button) view.findViewById(R.id.back_button);
+        listView = (ListView) view.findViewById(R.id.choosing_list_view);
+        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -99,11 +105,10 @@ public class ChooseAreaActivity extends AppCompatActivity {
 //                        activity.swipeRefreshLayout.setRefreshing(true);
 //                        activity.requestWeather(weatherId);
 //                    }
-                    Intent intent = new Intent(ChooseAreaActivity.this, MainActivity.class);
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
                     intent.putExtra("weather_id", weatherId);
                     startActivity(intent);
-                    finish();
-
+                    getActivity().finish();
                 }
             }
         });
@@ -119,6 +124,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
         });
         queryProvince();
     }
+
 
 
     //查询全国所有的省，优先从数据库查询，如果没有再到服务器上查询
@@ -188,11 +194,11 @@ public class ChooseAreaActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 //通过runOnUiThead（）方法回到主线程处理逻辑
-                runOnUiThread(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         closeProgessDialog();
-                        Toast.makeText(ChooseAreaActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -214,7 +220,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
                 }
                 Log.d("TAG", "onResponse: "+"11111111111111111111111111111111");
                 if (result){
-                    runOnUiThread(new Runnable() {
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             closeProgessDialog();
@@ -235,10 +241,9 @@ public class ChooseAreaActivity extends AppCompatActivity {
     //显示进度对话框
     private void showProgressDialog() {
         if (progressDialog == null){
-            progressDialog = new ProgressDialog(ChooseAreaActivity.this);
+            progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("正在加载...");
             progressDialog.setCanceledOnTouchOutside(false);
-            Log.d("TAG", "onResponse: " + type);
         }
         progressDialog.show();
     }
@@ -251,4 +256,3 @@ public class ChooseAreaActivity extends AppCompatActivity {
     }
 
 }
-
