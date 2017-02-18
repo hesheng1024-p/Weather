@@ -63,7 +63,6 @@ public class MainActivity extends FragmentActivity {
         }
         setContentView(R.layout.activity_main);
 
-
         initViewPager();
 
         //背景图片初始化
@@ -205,6 +204,7 @@ public class MainActivity extends FragmentActivity {
         public void onReceiveLocation(BDLocation bdLocation) {
             String weatherLocation = bdLocation.getCity();
             C.add(C.cityNameArry,weatherLocation);
+            saveArray(C.cityNameArry);
         }
 
         @Override
@@ -220,6 +220,13 @@ public class MainActivity extends FragmentActivity {
         finish();
         super.onBackPressed();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mLocationClient.stop();  //停止定位
+    }
+
 
     //------------------------------读取选择过的城市---------------------------------------
     //读取数据
@@ -237,10 +244,15 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mLocationClient.stop();  //停止定位
+    public  void saveArray(ArrayList<String> StringArray) {
+        JSONArray jsonArray = new JSONArray();
+        for (String b : StringArray) {
+            jsonArray.put(b);
+        }
+        SharedPreferences.Editor editor =
+                getSharedPreferences("choosedCityArray",MODE_PRIVATE).edit();
+        editor.putString("choosedCityArray",jsonArray.toString());
+        editor.apply();
     }
 
 }

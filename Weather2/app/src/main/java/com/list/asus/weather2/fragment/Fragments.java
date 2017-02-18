@@ -1,6 +1,8 @@
 package com.list.asus.weather2.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,6 +31,8 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by HP on 2017/2/16.
@@ -114,45 +118,68 @@ public class Fragments extends Fragment {
 
     }
 
-    //根据城市id请求天气信息
+    //根据城市id请求天气信息:先从缓存中寻找，找不到再去网上请求
     public void requestWeather(final String weatherId) {
-        Log.d("123456","req:" + weatherId);
-        String weatherURl = "https://free-api.heweather.com/v5/weather?city="
-                + weatherId + "&key=2881ccb3103344c389011b756a3b2120";
-        HttpUtil.sendOkHttpRequest(weatherURl, new Callback() {
+        SharedPreferences pref = getActivity().getSharedPreferences("weatherData",MODE_PRIVATE);
+        String responseText = pref.getString(weatherId,"");
+        if ("".equals(responseText)) {             //从网上请求
+            Log.d("123456", "req:" + weatherId);
+            String weatherURl = "https://free-api.heweather.com/v5/weather?city="
+                    + weatherId + "&key=2881ccb3103344c389011b756a3b2120";
+            HttpUtil.sendOkHttpRequest(weatherURl, new Callback() {
 
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getActivity(), "获取天气信息失败failure",
-                                Toast.LENGTH_SHORT).show();
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                final String responseText = response.body().string();
-                final Weather weather = Utility.handleWeatherResponse(responseText);
-                Log.d("123456","12"+weather);
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (weather != null && "ok".equals(weather.status)){
-                            showWeatherInfo(weather);
-                        }else {
-                            Toast.makeText(getActivity(), "获取天气信息失败",
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity(), "获取天气信息失败failure",
                                     Toast.LENGTH_SHORT).show();
+                            swipeRefreshLayout.setRefreshing(false);
                         }
-                        swipeRefreshLayout.setRefreshing(false);
+                    });
+                }
+
+                @Override
+                public void onResponse(Call call, final Response response) throws IOException {
+                    final String responseText = response.body().string();  //被转换成字符串的json数据
+                    //存储此地的天气数据
+                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("weatherData", MODE_PRIVATE).edit();
+                    editor.putString(weatherId, responseText);
+                    editor.apply();
+                    final Weather weather = Utility.handleWeatherResponse(responseText);
+                    Log.d("123456", "12" + weather);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (weather != null && "ok".equals(weather.status)) {
+                                showWeatherInfo(weather);
+                            } else {
+                                Toast.makeText(getActivity(), "获取天气信息失败",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    });
+                }
+            });
+        }else {                                            //从缓存中读取
+            final Weather weather = Utility.handleWeatherResponse(responseText);
+            Log.d("123456", "12" + weather);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (weather != null && "ok".equals(weather.status)) {
+                        showWeatherInfo(weather);
+                    } else {
+                        Toast.makeText(getActivity(), "获取天气信息失败",
+                                Toast.LENGTH_SHORT).show();
                     }
-                });
-            }
-        });
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            });
+        }
     }
 
     //处理并展示Weather实体类中的数据

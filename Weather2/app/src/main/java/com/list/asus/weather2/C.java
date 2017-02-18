@@ -14,7 +14,7 @@ public class C {
                 i++;
             }
         }
-        if (arrayList.size() == i){
+        if (arrayList.size() == i || string != null  || arrayList.size() < 9){
             arrayList.add(string);
         }
     }

@@ -1,4 +1,4 @@
-package com.list.asus.weather2;
+package com.list.asus.weather2.fragment;
 
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
@@ -15,6 +15,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.list.asus.weather2.C;
+import com.list.asus.weather2.ChooseActivity;
+import com.list.asus.weather2.R;
 import com.list.asus.weather2.db.City;
 import com.list.asus.weather2.db.County;
 import com.list.asus.weather2.db.Province;
